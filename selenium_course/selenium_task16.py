@@ -1,46 +1,56 @@
+import unittest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
 from faker import Faker
-fake = Faker
 
-try:
-    link = "http://suninjuly.github.io/registration1.html"
-    browser = webdriver.Chrome()
-    browser.get(link)
+fake = Faker()
 
-    link = "http://suninjuly.github.io/registration2.html"
-    browser = webdriver.Chrome()
-    browser.get(link)
+class TestRegistration(unittest.TestCase):
 
-    # Ваш код, который заполняет обязательные поля
-    field_first_name = browser.find_element(By.XPATH, "//input[@placeholder='Input your first name']")
-    field_first_name.send_keys(Faker().first_name())
+    def test_registration1(self):
+        link = "http://suninjuly.github.io/registration1.html"
+        browser = webdriver.Chrome()
+        browser.get(link)
 
-    field_last_name = browser.find_element(By.XPATH, "//input[@placeholder='Input your last name']")
-    field_last_name.send_keys(Faker().last_name())
+        # Заполняем обязательные поля с использованием уникальных селекторов
+        browser.find_element(By.CSS_SELECTOR, ".first_block .form-control.first").send_keys(fake.first_name())
+        browser.find_element(By.CSS_SELECTOR, ".first_block .form-control.second").send_keys(fake.last_name())
+        browser.find_element(By.CSS_SELECTOR, ".first_block .form-control.third").send_keys(fake.email())
 
-    field_email = browser.find_element(By.XPATH, "//input[@placeholder='Input your email']")
-    field_email.send_keys(Faker().email())
+        # Нажимаем кнопку
+        browser.find_element(By.CSS_SELECTOR, "button.btn").click()
 
-    # Отправляем заполненную форму
-    button = browser.find_element(By.CSS_SELECTOR, "button.btn")
-    button.click()
+        # Ждём загрузку страницы
+        time.sleep(1)
 
-    # Проверяем, что смогли зарегистрироваться
-    # ждем загрузки страницы
-    time.sleep(1)
+        # Проверка финального текста
+        welcome_text = browser.find_element(By.TAG_NAME, "h1").text
+        self.assertEqual(welcome_text, "Congratulations! You have successfully registered!")
 
-    # находим элемент, содержащий текст
-    welcome_text_elt = browser.find_element(By.TAG_NAME, "h1")
-    # записываем в переменную welcome_text текст из элемента welcome_text_elt
-    welcome_text = welcome_text_elt.text
+        browser.quit()
 
-    # с помощью assert проверяем, что ожидаемый текст совпадает с текстом на странице сайта
-    assert "Congratulations! You have successfully registered!" == welcome_text
+    def test_registration2(self):
+        link = "http://suninjuly.github.io/registration2.html"
+        browser = webdriver.Chrome()
+        browser.get(link)
 
-finally:
-    # ожидание чтобы визуально оценить результаты прохождения скрипта
-    time.sleep(10)
-    # закрываем браузер после всех манипуляций
-    browser.quit()
+        # Заполняем обязательные поля
+        browser.find_element(By.CSS_SELECTOR, ".first_block .form-control.first").send_keys(fake.first_name())
+        browser.find_element(By.CSS_SELECTOR, ".first_block .form-control.second").send_keys(fake.last_name())
+        browser.find_element(By.CSS_SELECTOR, ".first_block .form-control.third").send_keys(fake.email())
+
+        # Нажимаем кнопку
+        browser.find_element(By.CSS_SELECTOR, "button.btn").click()
+
+        time.sleep(1)
+
+        # Проверка текста
+        welcome_text = browser.find_element(By.TAG_NAME, "h1").text
+        self.assertEqual(welcome_text, "Congratulations! You have successfully registered!")
+
+        browser.quit()
+
+
+if __name__ == "__main__":
+    unittest.main()
